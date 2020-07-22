@@ -24,6 +24,12 @@ def parse_args():
     parser.add_argument(
         'input', type=str, help='Input .blend file path.')
     parser.add_argument(
+        '-b', '--background', action='store_true', required=False,
+        help="Blender's argument placeholder.")
+    parser.add_argument(
+        '-P', '--python', type=str, required=False,
+        help="Blender's argument placeholder.")
+    parser.add_argument(
         '-o', '--output', type=str, required=False,
         help='Output .gltf file path.')
     parser.add_argument(
@@ -39,7 +45,9 @@ def parse_args():
         '-a', '--action', type=str, required=False,
         help='Action name to export.')
     parser.add_argument(
-        '-s', '--speed', type=float, required=False, help='Animations speed scale.')
+        '-sp', '--speed', type=float, required=False, help='Animations speed scale.')
+    parser.add_argument(
+        '-sc', '--scale', type=float, required=False, help='Geom scale.')
     parser.add_argument(
         '-m', '--merge', action='store_true',
         help='Merge objects and meshes inside the collection.')

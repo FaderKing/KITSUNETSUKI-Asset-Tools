@@ -7,8 +7,43 @@ Collection of asset tools designed for automated pipeline.
 Installation
 ------------
 
+**Installing into [Anaconda](https://www.anaconda.com/products/individual) / [Miniconda](https://docs.conda.io/en/latest/miniconda.html) Python**
+
+This is an easiest way to install.
+It uses prebuilt Blender's Python module from Anaconda Cloud. You can also build one by yourself.
+
 ```
-pip install .
+conda install -c kitsune.one python-blender
+pip install git+https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools.git
+```
+
+
+**Installing into Python**
+
+This is the most difficult way to install.
+You have to find the Blender's Python module or build it by yourself.
+
+```
+pip install git+https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools.git
+```
+
+
+**Installing into [Blender](https://www.blender.org/download/) Python**
+
+The installation process is a little bit tricky for this one.
+You need to install Python modules into Blender's Python and run Python scripts with Blender.
+You can't run scripts which depends on Panda3D, for example *blend2egg*.
+
+```
+2.83/python/bin/python3.7m -m ensurepip
+2.83/python/bin/python3.7m -m pip install git+https://github.com/kitsune-ONE-team/KITSUNETSUKI-Asset-Tools.git
+```
+
+
+**Running asset tools from [Blender](https://www.blender.org/download/) Python**
+
+```
+blender -b -P 2.83/python/lib/python3.7/site-packages/kitsunetsuki/blend2gltf.py model.blend --output model.gltf
 ```
 
 
@@ -93,7 +128,7 @@ Features:
 
 EGG export requirements:
 * Panda3D (1.10.6+) for EGG generation
-* python-blender (2.81+) (Blender as Python module) or preinstalled Blender using the same path as Panda3D
+* python-blender (2.81+) (Blender as Python module) or Blender's Python
 
 Exporting models:
 ```
@@ -122,7 +157,7 @@ It's still in experimental state, so some features are still broken:
 * Can't export specular maps
 
 glTF export requirements:
-* python-blender (2.81+) (Blender as Python module) or preinstalled Blender using the same path as Panda3D
+* python-blender (2.81+) (Blender as Python module) or Blender's Python
 
 glTF loading requirements:
 * panda3d-gltf (0.7+)

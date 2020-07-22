@@ -30,6 +30,7 @@ NOT_MERGED_TYPES = (
     'Text',
     'Sprite',
     'Transparent',
+    'Protected',
 )
 
 
@@ -48,6 +49,9 @@ class Exporter(GeomMixin, MaterialMixin, TextureMixin, VertexMixin):
 
         # animations
         self._speed_scale = args.speed or 1
+
+        # geom scale
+        self._geom_scale = args.scale or 1
 
         # scripting
         self._script_name = args.exec
@@ -106,7 +110,7 @@ class Exporter(GeomMixin, MaterialMixin, TextureMixin, VertexMixin):
 
     def make_animation(self, parent_node, obj=None):
         for child in bpy.data.objects:
-            print(child)
+            # print(child)
             if not is_object_visible(child):
                 continue
 
@@ -144,7 +148,7 @@ class Exporter(GeomMixin, MaterialMixin, TextureMixin, VertexMixin):
             children = obj.children
 
         for child in children:
-            print(child)
+            # print(child)
             if not is_object_visible(child) and not is_collision(child):
                 continue
 

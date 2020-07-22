@@ -77,6 +77,10 @@ class GeomMixin(object):
 
     def make_geom(self, gltf_node, gltf_mesh, obj, can_merge=False):
         triangulate = True
+        if self._geom_scale != 1:
+            obj.scale.x = self._geom_scale
+            obj.scale.y = self._geom_scale
+            obj.scale.z = self._geom_scale
         apply_modifiers(obj, triangulate=triangulate)
         mesh = obj2mesh(obj, triangulate=triangulate)
 
@@ -248,7 +252,7 @@ class GeomMixin(object):
                         self._write_uv(gltf_primitive, uv_id, u, v)
                         if uv_name in uv_tb and uv_layer.active:
                             self._write_tbs(
-                                gltf_primitive, obj, *uv_tb[uv_name][loop_id],
+                                obj_matrix, gltf_primitive, *uv_tb[uv_name][loop_id],
                                 can_merge=can_merge)
                         # vertex uv -->
 

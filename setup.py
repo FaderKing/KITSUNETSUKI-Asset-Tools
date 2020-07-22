@@ -18,7 +18,7 @@ from setuptools import setup
 
 setup(
     name='kitsunetsuki-asset-tools',
-    version='0.3.0',
+    version='0.3.1',
     description='KITSUNETSUKI Asset Tools',
     long_description='KITSUNETSUKI Asset Tools',
     url='https://kitsune.one/',
@@ -32,11 +32,13 @@ setup(
         'kitsunetsuki.exporter.base',
         'kitsunetsuki.exporter.egg',
         'kitsunetsuki.exporter.gltf',
+        'kitsunetsuki.cardmaker',
     ),
     entry_points={
         'console_scripts': (
             'blend2gltf=kitsunetsuki.blend2gltf:main',
             'blend2egg=kitsunetsuki.blend2egg:main',
+            'makecard=kitsunetsuki.makecard:main',
         ),
     },
 )

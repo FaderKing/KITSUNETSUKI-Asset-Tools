@@ -1,4 +1,4 @@
-# Copyright (c) 2019 kitsune.ONE team.
+# Copyright (c) 2020 kitsune.ONE team.
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ import bpy
 import collections
 import math
 
-from kitsunetsuki.base.matrices import get_bone_matrix, matrix_to_panda
+from kitsunetsuki.base.matrices import get_bone_matrix
 
 from panda3d.core import CS_zup_right
 from panda3d.egg import EggTable, EggXfmSAnim
@@ -113,6 +113,7 @@ class AnimationMixin(object):
                 #     s_anim.add_component_data('p', p)
                 #     s_anim.add_component_data('r', r)
 
+                # hpr == zxy ?
                 p, r, h = tuple(map(math.degrees, bone_matrix.to_euler('YXZ')))
                 s_anim.add_component_data('h', h)
                 s_anim.add_component_data('p', p)

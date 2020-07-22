@@ -15,14 +15,14 @@
 
 import json
 import math
+import itertools
 
-from panda3d.core import CS_zup_right
+from panda3d.core import CS_zup_right, LMatrix4d
 from panda3d.egg import EggComment, EggData, EggGroup, EggPolygon, EggTransform
 
 from kitsunetsuki.base.armature import get_armature
 from kitsunetsuki.base.collections import get_object_collection
-from kitsunetsuki.base.matrices import (
-    get_object_matrix, get_bone_matrix, matrix_to_panda)
+from kitsunetsuki.base.matrices import get_object_matrix, get_bone_matrix
 from kitsunetsuki.base.objects import is_collision, get_object_properties
 
 from kitsunetsuki.exporter.base import Exporter
@@ -32,6 +32,10 @@ from .geom import GeomMixin
 from .material import MaterialMixin
 from .texture import TextureMixin
 from .vertex import VertexMixin
+
+
+def matrix_to_panda(matrix):
+    return LMatrix4d(*itertools.chain(*map(tuple, matrix.col)))
 
 
 class EggExporter(
@@ -56,68 +60,66 @@ class EggExporter(
         return egg_root
 
     def _setup_node(self, node, obj=None, can_merge=False):
-        if obj is not None:
-            armature = get_armature(obj)
-            obj_matrix = get_object_matrix(obj, armature=armature)
+        if obj is None:
+            return
 
-            # if not can_merge:
-            if not can_merge and not armature:
-                node.add_matrix4(matrix_to_panda(obj_matrix))
+        armature = get_armature(obj)
+        obj_matrix = get_object_matrix(obj, armature=armature)
 
-            # get custom object properties
-            obj_props = get_object_properties(obj)
+        # get custom object properties
+        obj_props = get_object_properties(obj)
 
-            if obj_props.get('type') == 'Portal':
-                node.set_portal_flag(True)
+        if not can_merge and not armature:
+            node.add_matrix4(matrix_to_panda(obj_matrix))
 
-            # setup collisions
-            elif is_collision(obj):
-                # collision name
-                node.set_collision_name(obj.name)
+        if obj_props.get('type') == 'Portal':
+            node.set_portal_flag(True)
 
-                # collision solid type
-                shape = {
-                    'BOX': EggGroup.CST_box,
-                    'SPHERE': EggGroup.CST_sphere,
-                    'CAPSULE': EggGroup.CST_tube,
-                    'MESH': EggGroup.CST_polyset,
-                }.get(obj.rigid_body.collision_shape, EggGroup.CST_polyset)
+        # setup collisions
+        if not can_merge and is_collision(obj):
+            # collision name
+            node.set_collision_name(obj.name)
 
-                # custom shape
-                if obj.rigid_body.collision_shape == 'CONVEX_HULL':
-                    # trying to guess the best shape
-                    polygons = list(filter(
-                        lambda x: isinstance(x, EggPolygon),
-                        node.get_children()))
-                    if len(polygons) == 1 and polygons[0].is_planar():
-                        # shape = EggGroup.CST_plane  # <- is it infinite?
-                        shape = EggGroup.CST_polygon
-                node.set_cs_type(shape)
+            # collision solid type
+            shape = {
+                'BOX': EggGroup.CST_box,
+                'SPHERE': EggGroup.CST_sphere,
+                'CAPSULE': EggGroup.CST_tube,
+                'MESH': EggGroup.CST_polyset,
+            }.get(obj.rigid_body.collision_shape, EggGroup.CST_polyset)
 
-                # collision flags
-                # inherit collision by children nodes?
-                flags = EggGroup.CF_descend
-                if (not obj.collision or not obj.collision.use):
-                    # don't actually collide (ghost)
-                    flags |= EggGroup.CF_intangible
-                node.set_collide_flags(flags)
+            # custom shape
+            if obj.rigid_body.collision_shape == 'CONVEX_HULL':
+                # trying to guess the best shape
+                polygons = list(filter(
+                    lambda x: isinstance(x, EggPolygon),
+                    node.get_children()))
+                if len(polygons) == 1 and polygons[0].is_planar():
+                    # shape = EggGroup.CST_plane  # <- is it infinite?
+                    shape = EggGroup.CST_polygon
+            node.set_cs_type(shape)
 
-            # save object custom properties
-            for k, v in obj_props.items():
-                if node.get_tag(k):  # tag exists
-                    tag = node.get_tag(k)
+            # collision flags
+            # inherit collision by children nodes?
+            flags = EggGroup.CF_descend
+            if (not obj.collision or not obj.collision.use):
+                # don't actually collide (ghost)
+                flags |= EggGroup.CF_intangible
+            node.set_collide_flags(flags)
 
-                    if k == 'type':
-                        continue
+        # setup custom properties with tags
+        for k, v in obj_props.items():
+            if node.get_tag(k):  # tag exists
+                tag = node.get_tag(k)
 
-                if type(v) in (tuple, list, dict):
-                    tag = json.dumps(v)
-                else:
-                    tag = '{}'.format(v)
-                node.set_tag(k, tag)
+            if type(v) in (tuple, list, dict):
+                tag = json.dumps(v)
+            else:
+                tag = '{}'.format(v)
+            node.set_tag(k, tag)
 
-            if obj_props.get('type') == 'Portal':
-                node.set_portal_flag(True)
+        if can_merge and 'type' not in obj_props:
+            node.set_tag('type', 'Merged')
 
     def make_empty(self, parent_node, obj):
         egg_group = EggGroup(obj.name)
@@ -170,7 +172,7 @@ class EggExporter(
                     break
             else:
                 egg_group = EggGroup(collection.name)
-                self._setup_node(egg_group, can_merge=True)
+                self._setup_node(egg_group, obj, can_merge=True)
                 parent_node.add_child(egg_group)
 
             self.make_geom(egg_group, obj, can_merge=True)
